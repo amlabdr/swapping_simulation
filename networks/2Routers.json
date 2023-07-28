@@ -1,0 +1,85 @@
+{
+  "nodes": [
+    {
+      "name": "Nodei",
+      "type": "QuantumRouter",
+      "seed": 0,
+      "memo_size": 1
+    },
+    {
+      "name": "r1",
+      "type": "QuantumRouter",
+      "seed": 0,
+      "memo_size": 2
+    },
+    {
+      "name": "r2",
+      "type": "QuantumRouter",
+      "seed": 0,
+      "memo_size": 2
+    },
+    {
+      "name": "Nodej",
+      "type": "QuantumRouter",
+      "seed": 0,
+      "memo_size": 1
+    }
+  ],
+  "qconnections": [
+    {
+      "node1": "Nodei",
+      "node2": "r1",
+      "distance": 63666.666666666664,
+      "attenuation": 0,
+      "type": "meet_in_the_middle"
+    },
+    {
+      "node1": "r1",
+      "node2": "r2",
+      "distance": 63666.666666666664,
+      "attenuation": 0,
+      "type": "meet_in_the_middle"
+    },
+    {
+      "node1": "r2",
+      "node2": "Nodej",
+      "distance": 63666.666666666664,
+      "attenuation": 0,
+      "type": "meet_in_the_middle"
+    }
+  ],
+  "is_parallel": false,
+  "stop_time": 2000000000000,
+  "cconnections": [
+    {
+      "node1": "Nodei",
+      "node2": "r1",
+      "distance": 63666.666666666664
+    },
+    {
+      "node1": "Nodei",
+      "node2": "r2",
+      "distance": 63666.666666666664
+    },
+    {
+      "node1": "Nodei",
+      "node2": "Nodej",
+      "distance": 63666.666666666664
+    },
+    {
+      "node1": "r1",
+      "node2": "r2",
+      "distance": 63666.666666666664
+    },
+    {
+      "node1": "r1",
+      "node2": "Nodej",
+      "distance": 63666.666666666664
+    },
+    {
+      "node1": "r2",
+      "node2": "Nodej",
+      "distance": 63666.666666666664
+    }
+  ]
+}
