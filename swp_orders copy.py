@@ -1,9 +1,9 @@
-from sequence.kernel.process import Process
-from sequence.kernel.event import Event
+from sequence.network_management.network_manager import ResourceReservationProtocol
+from sequence.network_management.reservation import Reservation
+from swaping_rules.ResourceReservationProtocol import create_rules_es_left_to_right, create_rules_es_right_to_left
+from sequence.topology.node import QuantumRouter
 from sequence.topology.router_net_topo import RouterNetTopo
 import json
-import numpy as np
-
 class RequestApp:
     def __init__(self, node: "QuantumRouter", other: str, memory_size=1, target_fidelity=0.9):
         self.node = node
@@ -87,11 +87,10 @@ def set_distances(network_config, total_distance):
     with open(network_config, 'w') as file:
         json.dump(data, file, indent=2)
 
-
-def set_parameters(topology: RouterNetTopo, tch):
+def set_parameters(topology: RouterNetTopo,detector_eff):
     # set memory parameters
     MEMO_FREQ = -1
-    MEMO_EXPIRE = tch
+    MEMO_EXPIRE = 10e-3 #(10 ms)
     MEMO_EFFICIENCY =   0.53
     MEMO_FIDELITY =0.99
     WAVE_LENGTH = 500
@@ -104,22 +103,27 @@ def set_parameters(topology: RouterNetTopo, tch):
         memory_array.update_memory_params("wavelength", WAVE_LENGTH)
 
     # set detector parameters
-    DETECTOR_EFFICIENCY = 1
     
+    node_index = 0
     for node in topology.get_nodes_by_type(RouterNetTopo.BSM_NODE):
+        """print(node.name)
+        print(detector_eff[node_index])"""
         bsm = node.get_components_by_type("SingleAtomBSM")[0]
-        bsm.update_detectors_params("efficiency", DETECTOR_EFFICIENCY)
+        bsm.update_detectors_params("efficiency", detector_eff[node_index])
+        node_index+=1
     # set entanglement swapping parameters
-    SWAP_SUCC_PROB = 1
+    SWAPPIN_SUCCESS_RATE = 1
     for node in topology.get_nodes_by_type(RouterNetTopo.QUANTUM_ROUTER):
-        node.network_manager.protocol_stack[1].set_swapping_success_rate(SWAP_SUCC_PROB)
-    
-
-def simulate(network_config,distance, tch):
+        node.network_manager.protocol_stack[1].set_swapping_success_rate(SWAPPIN_SUCCESS_RATE)
+        
+        
+def simulate(network_config,distance,detector_eff,swapping_order = None):
     set_distances(network_config, distance)
+    if swapping_orders is not None:
+        ResourceReservationProtocol.create_rules = swapping_order
     network_topo = RouterNetTopo(network_config)
     #set the simulation parametters
-    set_parameters(network_topo,tch)
+    set_parameters(network_topo,detector_eff)
     tl = network_topo.get_timeline()
     tl.stop_time = 2e12
     tl.show_progress = False
@@ -146,18 +150,21 @@ def simulate(network_config,distance, tch):
 
 final_distance = 200000
 distances = list(range(1000, final_distance+1, 10000))
-#distances = [10000]
+distances = [10000]
 network_config = "networks/2Routers.json"
-TCHdict = {"inf":0,"1ms":1e-3,"10ms":10e-3,"100ms":100e-3,"1s":1}
-for tch in TCHdict:
-    print("simulation fr tch:", tch)
-    rates = []
-    for L in distances:
-        rates.append(simulate(network_config, L,TCHdict[tch]))
-        print("Simulation done for ", L)
-        filename =  'data/rates/' +  ('network(N=%s)(cohTime=%s).txt' 
-                                        % ( network_config.split('/')[-1],
-                                            '%.3fms' % ( TCHdict[tch] / 1e-3 ) if TCHdict[tch] > 0.0 else 'inf'
-                                            ))
-        # Save rates to a file
-        np.savetxt(filename, rates)
+swapping_orders = {"left_to_right":create_rules_es_left_to_right,"right_to_left":create_rules_es_right_to_left}
+detector_eff = [[1,1,0.4]]
+for eff in detector_eff:
+    for swp_order in swapping_orders:
+        print("simulation fr swapping order:", swp_order)
+        rates = []
+        for L in distances:
+            rates.append(simulate(network_config, L,eff,swapping_orders[swp_order]))
+            #simulate(network_config, L)
+            print("Simulation done for ", L)
+            filename =  'data/rates/' +  ('network(N=%s)(Swapping_order=%s).txt' 
+                                            % ( network_config.split('/')[-1],
+                                                swp_order
+                                                ))
+            # Save rates to a file
+            #np.savetxt(filename, rates)

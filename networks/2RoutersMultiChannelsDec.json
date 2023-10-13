@@ -9,41 +9,41 @@
     {
       "name": "r1",
       "type": "QuantumRouter",
-      "seed": 0,
-      "memo_size": 3
+      "seed": 1,
+      "memo_size": 6
     },
     {
       "name": "r2",
       "type": "QuantumRouter",
-      "seed": 0,
-      "memo_size": 6
+      "seed": 2,
+      "memo_size": 3
     },
     {
       "name": "Nodej",
       "type": "QuantumRouter",
-      "seed": 0,
-      "memo_size": 4
+      "seed": 3,
+      "memo_size": 1
     }
   ],
   "qconnections": [
     {
       "node1": "Nodei",
       "node2": "r1",
-      "distance": 63666.666666666664,
+      "distance": 3333.3333333333335,
       "attenuation": 0,
       "type": "meet_in_the_middle"
     },
     {
       "node1": "r1",
       "node2": "r2",
-      "distance": 63666.666666666664,
+      "distance": 3333.3333333333335,
       "attenuation": 0,
       "type": "meet_in_the_middle"
     },
     {
       "node1": "r2",
       "node2": "Nodej",
-      "distance": 63666.666666666664,
+      "distance": 3333.3333333333335,
       "attenuation": 0,
       "type": "meet_in_the_middle"
     }
@@ -54,32 +54,32 @@
     {
       "node1": "Nodei",
       "node2": "r1",
-      "distance": 63666.666666666664
+      "distance": 3333.3333333333335
     },
     {
       "node1": "Nodei",
       "node2": "r2",
-      "distance": 63666.666666666664
+      "distance": 3333.3333333333335
     },
     {
       "node1": "Nodei",
       "node2": "Nodej",
-      "distance": 63666.666666666664
+      "distance": 3333.3333333333335
     },
     {
       "node1": "r1",
       "node2": "r2",
-      "distance": 63666.666666666664
+      "distance": 3333.3333333333335
     },
     {
       "node1": "r1",
       "node2": "Nodej",
-      "distance": 63666.666666666664
+      "distance": 3333.3333333333335
     },
     {
       "node1": "r2",
       "node2": "Nodej",
-      "distance": 63666.666666666664
+      "distance": 3333.3333333333335
     }
   ]
 }
