@@ -262,7 +262,7 @@ def simulate(network_config,distance,swapping_order = None):
 
 final_distance = 200000
 distances = list(range(1000, final_distance+1, 10000))
-distances = [10000]
+#distances = [10000]
 network_config = "networks/2RoutersMultiChannels.json"
 network_config = "networks/2RoutersMultiChannelsDec.json"
 #network_config = "networks/adjacents.json"
