@@ -4,19 +4,19 @@
       "name": "Nodei",
       "type": "QuantumRouter",
       "seed": 0,
-      "memo_size": 1
+      "memo_size": 50
     },
     {
       "name": "r1",
       "type": "QuantumRouter",
       "seed": 0,
-      "memo_size": 2
+      "memo_size": 50
     },
     {
       "name": "Nodej",
       "type": "QuantumRouter",
       "seed": 0,
-      "memo_size": 1
+      "memo_size": 50
     }
   ],
   "qconnections": [

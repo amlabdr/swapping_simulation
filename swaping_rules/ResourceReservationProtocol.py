@@ -279,6 +279,127 @@ def es_rule_conditionB2(memory_info: "MemoryInfo", manager: "MemoryManager", arg
     else:
         return []
 
+def create_rules(self, path: List[str], reservation: "Reservation") -> List["Rule"]:
+    """Method to create rules for a successful request.
+
+    Rules are used to direct the flow of information/entanglement in the resource manager.
+
+    Args:
+        path (List[str]): list of node names in entanglement path.
+        reservation (Reservation): approved reservation.
+
+    Returns:
+        List[Rule]: list of rules created by the method.
+    """
+    #print(reservation.link_capacity)
+    #print(reservation.swapping_order)
+    rules = []
+    memory_indices = []
+    for card in self.timecards:
+        memory_indices.append(card.memory_index)
+
+    # create rules for entanglement generation
+    index = path.index(self.own.name)
+    if index > 0:
+        condition_args = {"memory_indices": memory_indices[:reservation.link_capacity[index-1]]}
+        action_args = {"mid": self.own.map_to_middle_node[path[index - 1]],
+                        "path": path, "index": index}
+        rule = Rule(10, eg_rule_action1, eg_rule_condition, action_args, condition_args)
+        rules.append(rule)
+        #print("condition args: <--",condition_args)
+    if index < len(path) - 1:
+        if index == 0:
+            condition_args = {"memory_indices": memory_indices[:reservation.link_capacity[index]]}
+        else:
+            condition_args = {"memory_indices":
+                                    memory_indices[reservation.link_capacity[index-1]:reservation.link_capacity[index-1]+reservation.link_capacity[index]]}
+
+        action_args = {"mid": self.own.map_to_middle_node[path[index + 1]],
+                        "path": path, "index": index, "name": self.own.name,
+                        "reservation": reservation}
+        rule = Rule(10, eg_rule_action2, eg_rule_condition, action_args, condition_args)
+        rules.append(rule)
+
+    # create rules for entanglement purification
+    if index > 0:
+        condition_args = {"memory_indices":
+                                memory_indices[:reservation.link_capacity[index-1]],
+                            "reservation": reservation}
+        action_args = {}
+        rule = Rule(10, ep_rule_action1, ep_rule_condition1, action_args, condition_args)
+        rules.append(rule)
+
+    if index < len(path) - 1:
+        if index == 0:
+            condition_args = {"memory_indices": memory_indices,
+                                "fidelity": reservation.fidelity}
+        else:
+            condition_args = {"memory_indices": memory_indices[reservation.link_capacity[index-1]:reservation.link_capacity[index-1]+reservation.link_capacity[index]],
+                                "fidelity": reservation.fidelity}
+
+        action_args = {}
+        rule = Rule(10, ep_rule_action2, ep_rule_condition2, action_args, condition_args)
+        rules.append(rule)
+
+    # create rules for entanglement swapping
+    if index == 0:
+        condition_args = {"memory_indices": memory_indices,
+                            "target_remote": path[-1],
+                            "fidelity": reservation.fidelity}
+        action_args = {}
+        rule = Rule(10, es_rule_actionB, es_rule_conditionB1, action_args, condition_args)
+        rules.append(rule)
+
+    elif index == len(path) - 1:
+        action_args = {}
+        condition_args = {"memory_indices": memory_indices,
+                            "target_remote": path[0],
+                            "fidelity": reservation.fidelity}
+        rule = Rule(10, es_rule_actionB, es_rule_conditionB1, action_args, condition_args)
+        rules.append(rule)
+
+    else:
+        """_path = path[:]
+        while _path.index(self.own.name) % 2 == 0:
+            new_path = []
+            for i, n in enumerate(_path):
+                if i % 2 == 0 or i == len(_path) - 1:
+                    new_path.append(n)
+            _path = new_path
+        _index = _path.index(self.own.name)
+        left, right = _path[_index - 1], _path[_index + 1]"""
+        # Modified logic based on the specified order
+        node_index_in_order = reservation.swapping_order.index(path[index])
+        
+        # For the last node in the order list
+        if node_index_in_order == len(reservation.swapping_order) - 1:
+            left, right = path[0], path[-1]
+        else:
+            # Find the nearest node from the left that is not before the current node in the order list
+            left = next((node for node in reversed(path[:index]) if node not in reservation.swapping_order[:node_index_in_order]), None)
+
+            # Find the nearest node from the right that is not before the current node in the order list
+            right = next((node for node in path[index + 1:] if node not in reservation.swapping_order[:node_index_in_order]), None)
+
+
+        condition_args = {"memory_indices": memory_indices,
+                            "left": left,
+                            "right": right,
+                            "fidelity": reservation.fidelity}
+        action_args = {"es_succ_prob": self.es_succ_prob,
+                        "es_degradation": self.es_degradation}
+        rule = Rule(10, es_rule_actionA, es_rule_conditionA, action_args, condition_args)
+        rules.append(rule)
+
+        action_args = {}
+        rule = Rule(10, es_rule_actionB, es_rule_conditionB2, action_args, condition_args)
+        rules.append(rule)
+
+    for rule in rules:
+        rule.set_reservation(reservation)
+
+    return rules
+
 
 def create_rules_es_right_to_left(self, path: List[str], reservation: "Reservation") -> List["Rule"]:
     """Method to create rules for a successful request.
